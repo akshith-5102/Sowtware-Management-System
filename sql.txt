@@ -1,0 +1,374 @@
+-- ============================================
+-- SOFTWARE PROJECT MANAGEMENT SYSTEM
+-- PostgreSQL Complete SQL Code
+-- ============================================
+
+
+-- ============================================
+-- 1. EMPLOYEE TABLE
+-- ============================================
+
+CREATE TABLE Employee (
+    employee_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    designation VARCHAR(50),
+    email VARCHAR(100) UNIQUE NOT NULL,
+    experience_years INT CHECK (experience_years >= 0),
+    salary DECIMAL(10,2)
+);
+
+
+-- ============================================
+-- 2. PROJECT TABLE
+-- ============================================
+
+CREATE TABLE Project (
+    project_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    project_name VARCHAR(150) NOT NULL,
+    description TEXT,
+    start_date DATE,
+    end_date DATE,
+    status VARCHAR(30) DEFAULT 'Planning',
+    manager_id INT,
+    FOREIGN KEY (manager_id)
+        REFERENCES Employee(employee_id)
+);
+
+
+-- ============================================
+-- 3. TEAM TABLE
+-- ============================================
+
+CREATE TABLE Team (
+    team_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    team_name VARCHAR(100) NOT NULL,
+    project_id INT NOT NULL,
+    lead_id INT,
+    FOREIGN KEY (project_id)
+        REFERENCES Project(project_id),
+    FOREIGN KEY (lead_id)
+        REFERENCES Employee(employee_id)
+);
+
+
+-- ============================================
+-- 4. TEAM_MEMBER TABLE
+-- ============================================
+
+CREATE TABLE Team_Member (
+    team_id INT NOT NULL,
+    employee_id INT NOT NULL,
+    joined_date DATE,
+    PRIMARY KEY (team_id, employee_id),
+    FOREIGN KEY (team_id)
+        REFERENCES Team(team_id),
+    FOREIGN KEY (employee_id)
+        REFERENCES Employee(employee_id)
+);
+
+
+-- ============================================
+-- 5. SPRINT TABLE
+-- ============================================
+
+CREATE TABLE Sprint (
+    sprint_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    sprint_name VARCHAR(100),
+    project_id INT NOT NULL,
+    start_date DATE,
+    end_date DATE,
+    goal TEXT,
+    status VARCHAR(20) DEFAULT 'Planned',
+    FOREIGN KEY (project_id)
+        REFERENCES Project(project_id)
+);
+
+
+-- ============================================
+-- 6. TASK TABLE
+-- ============================================
+
+CREATE TABLE Task (
+    task_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    sprint_id INT,
+    assigned_to INT,
+    task_title VARCHAR(200) NOT NULL,
+    description TEXT,
+    priority VARCHAR(20) DEFAULT 'Medium',
+    story_points INT,
+    status VARCHAR(20) DEFAULT 'Todo',
+    due_date DATE,
+    completion_date DATE,
+    FOREIGN KEY (sprint_id)
+        REFERENCES Sprint(sprint_id),
+    FOREIGN KEY (assigned_to)
+        REFERENCES Employee(employee_id)
+);
+
+
+-- ============================================
+-- 7. BUG TABLE
+-- ============================================
+
+CREATE TABLE Bug (
+    bug_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    task_id INT,
+    reported_by INT NOT NULL,
+    assigned_to INT,
+    title VARCHAR(200) NOT NULL,
+    severity VARCHAR(20),
+    status VARCHAR(20) DEFAULT 'Open',
+    reported_date DATE DEFAULT CURRENT_DATE,
+    resolved_date DATE,
+    FOREIGN KEY (task_id)
+        REFERENCES Task(task_id),
+    FOREIGN KEY (reported_by)
+        REFERENCES Employee(employee_id),
+    FOREIGN KEY (assigned_to)
+        REFERENCES Employee(employee_id)
+);
+
+
+-- ============================================
+-- SAMPLE DATA
+-- ============================================
+
+
+-- ============================================
+-- EMPLOYEE DATA
+-- ============================================
+
+INSERT INTO Employee
+(employee_id, first_name, last_name, designation, email,
+ experience_years, salary)
+OVERRIDING SYSTEM VALUE
+VALUES
+(1,'Ravi','Kumar','Project Manager',
+ 'ravi.kumar@software.com',8,85000),
+
+(2,'Priya','Sharma','Software Developer',
+ 'priya.sharma@software.com',4,60000),
+
+(3,'Arjun','Reddy','Team Lead',
+ 'arjun.reddy@software.com',6,75000),
+
+(4,'Sneha','Patel','UI/UX Designer',
+ 'sneha.patel@software.com',3,50000),
+
+(5,'Karthik','Varma','Backend Developer',
+ 'karthik.varma@software.com',5,65000),
+
+(6,'Divya','Nair','QA Engineer',
+ 'divya.nair@software.com',3,48000);
+
+
+-- ============================================
+-- PROJECT DATA
+-- ============================================
+
+INSERT INTO Project
+(project_id, project_name, description, start_date,
+ end_date, status, manager_id)
+OVERRIDING SYSTEM VALUE
+VALUES
+(1,'EduTrack LMS',
+ 'Learning Management System',
+ '2026-01-10','2026-06-30',
+ 'Completed',1),
+
+(2,'HealthBot AI',
+ 'AI based healthcare chatbot',
+ '2026-02-15','2026-08-31',
+ 'In Progress',3),
+
+(3,'FinancePro ERP',
+ 'Enterprise finance management system',
+ '2026-03-01','2026-12-31',
+ 'Planning',1),
+
+(4,'ShopEasy',
+ 'Online shopping management system',
+ '2026-04-01','2026-10-30',
+ 'In Progress',3),
+
+(5,'TravelMate',
+ 'Travel booking management system',
+ '2026-05-01','2026-11-30',
+ 'Planning',1),
+
+(6,'FitTrack',
+ 'Fitness tracking application',
+ '2026-06-01','2026-12-31',
+ 'Planning',3);
+
+
+-- ============================================
+-- TEAM DATA
+-- ============================================
+
+INSERT INTO Team
+(team_id, team_name, project_id, lead_id)
+OVERRIDING SYSTEM VALUE
+VALUES
+(1,'EduTrack Team',1,3),
+(2,'HealthBot Team',2,3),
+(3,'FinancePro Team',3,2),
+(4,'ShopEasy Team',4,4),
+(5,'TravelMate Team',5,1),
+(6,'FitTrack Team',6,6);
+
+
+-- ============================================
+-- TEAM MEMBER DATA
+-- ============================================
+
+INSERT INTO Team_Member
+(team_id, employee_id, joined_date)
+VALUES
+(1,3,'2026-01-10'),
+(2,5,'2026-02-15'),
+(3,2,'2026-03-01'),
+(4,4,'2026-04-01'),
+(5,1,'2026-05-01'),
+(6,6,'2026-06-01');
+
+
+-- ============================================
+-- SPRINT DATA
+-- ============================================
+
+INSERT INTO Sprint
+(sprint_id, sprint_name, project_id, start_date,
+ end_date, goal, status)
+OVERRIDING SYSTEM VALUE
+VALUES
+(1,'EduTrack Sprint 1',1,
+ '2026-01-10','2026-01-24',
+ 'Design and login development','Completed'),
+
+(2,'HealthBot Sprint 1',2,
+ '2026-02-15','2026-03-01',
+ 'Develop chatbot interface','Completed'),
+
+(3,'FinancePro Sprint 1',3,
+ '2026-03-01','2026-03-15',
+ 'Develop finance module','Planned'),
+
+(4,'ShopEasy Sprint 1',4,
+ '2026-04-01','2026-04-15',
+ 'Develop shopping module','In Progress'),
+
+(5,'TravelMate Sprint 1',5,
+ '2026-05-01','2026-05-15',
+ 'Develop booking module','Planned'),
+
+(6,'FitTrack Sprint 1',6,
+ '2026-06-01','2026-06-15',
+ 'Develop fitness tracking module','Planned');
+
+
+-- ============================================
+-- TASK DATA
+-- ============================================
+
+INSERT INTO Task
+(task_id, sprint_id, assigned_to, task_title,
+ description, priority, story_points, status,
+ due_date, completion_date)
+OVERRIDING SYSTEM VALUE
+VALUES
+(1,1,4,
+ 'Design Login UI',
+ 'Create login page interface',
+ 'High',5,'Completed',
+ '2026-01-20','2026-01-19'),
+
+(2,2,5,
+ 'Develop Chatbot API',
+ 'Create backend API for chatbot',
+ 'High',8,'Completed',
+ '2026-02-28','2026-02-27'),
+
+(3,3,2,
+ 'Finance Module',
+ 'Develop finance management module',
+ 'Medium',8,'Todo',
+ '2026-03-14',NULL),
+
+(4,4,4,
+ 'Shopping Cart',
+ 'Develop shopping cart functionality',
+ 'High',5,'In Progress',
+ '2026-04-14',NULL),
+
+(5,5,1,
+ 'Booking Module',
+ 'Develop travel booking functionality',
+ 'Medium',8,'Todo',
+ '2026-05-14',NULL),
+
+(6,6,6,
+ 'Fitness Dashboard',
+ 'Develop fitness tracking dashboard',
+ 'Medium',5,'Todo',
+ '2026-06-14',NULL);
+
+
+-- ============================================
+-- BUG DATA
+-- ============================================
+
+INSERT INTO Bug
+(bug_id, task_id, reported_by, assigned_to,
+ title, severity, status, reported_date, resolved_date)
+OVERRIDING SYSTEM VALUE
+VALUES
+(1,1,6,4,
+ 'Login button not responsive',
+ 'High','Resolved',
+ '2026-01-18','2026-01-19'),
+
+(2,2,6,5,
+ 'Chatbot API error',
+ 'High','Resolved',
+ '2026-02-25','2026-02-27'),
+
+(3,3,6,2,
+ 'Finance calculation error',
+ 'Critical','Open',
+ '2026-03-10',NULL),
+
+(4,4,6,4,
+ 'Cart total calculation issue',
+ 'Medium','Open',
+ '2026-04-10',NULL),
+
+(5,5,6,1,
+ 'Booking confirmation error',
+ 'High','Open',
+ '2026-05-10',NULL),
+
+(6,6,6,6,
+ 'Dashboard data not loading',
+ 'Medium','Open',
+ '2026-06-10',NULL);
+
+
+-- ============================================
+-- CHECK THE TABLES
+-- ============================================
+
+SELECT * FROM Employee;
+
+SELECT * FROM Project;
+
+SELECT * FROM Team;
+
+SELECT * FROM Team_Member;
+
+SELECT * FROM Sprint;
+
+SELECT * FROM Task;
+
+SELECT * FROM Bug;
